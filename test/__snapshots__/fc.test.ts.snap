@@ -1,0 +1,218 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test serverless devs yaml generate fc case analyzeFunction should test http trigger method all 1`] = `
+[
+  {
+    "function": {
+      "handler": "helloService.hello",
+      "name": "helloService-hello",
+    },
+    "functionName": "helloService-hello",
+    "triggers": [
+      {
+        "config": {
+          "methods": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "HEAD",
+          ],
+        },
+        "name": "http-38245ab0e0",
+        "type": "http",
+      },
+    ],
+  },
+]
+`;
+
+exports[`test serverless devs yaml generate fc case analyzeFunction should test http trigger method any 1`] = `
+[
+  {
+    "function": {
+      "handler": "helloService.hello",
+      "name": "helloService-hello",
+    },
+    "functionName": "helloService-hello",
+    "triggers": [
+      {
+        "config": {
+          "methods": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "HEAD",
+          ],
+        },
+        "name": "http-7070135c53",
+        "type": "http",
+      },
+    ],
+  },
+]
+`;
+
+exports[`test serverless devs yaml generate fc case analyzeFunction should transform multi http trigger with same function 1`] = `
+[
+  {
+    "function": {
+      "handler": "helloService.hello",
+      "name": "helloService-hello",
+    },
+    "functionName": "helloService-hello",
+    "triggers": [
+      {
+        "config": {
+          "methods": [
+            "POST",
+          ],
+        },
+        "name": "http-d9892a5b83",
+        "type": "http",
+      },
+      {
+        "config": {
+          "methods": [
+            "GET",
+          ],
+        },
+        "name": "http-d5835c7a08",
+        "type": "http",
+      },
+    ],
+  },
+]
+`;
+
+exports[`test serverless devs yaml generate fc case analyzeFunction should transform multi trigger mixin 1`] = `
+[
+  {
+    "function": {
+      "handler": "helloService.hello",
+      "name": "helloService-hello",
+    },
+    "functionName": "helloService-hello",
+    "triggers": [
+      {
+        "config": {
+          "methods": [
+            "POST",
+          ],
+        },
+        "name": "http-d9892a5b83",
+        "type": "http",
+      },
+      {
+        "config": {
+          "methods": [
+            "GET",
+          ],
+        },
+        "name": "http-d5835c7a08",
+        "type": "http",
+      },
+    ],
+  },
+  {
+    "function": {
+      "handler": "helloService.timer",
+      "name": "helloService-timer",
+    },
+    "functionName": "helloService-timer",
+    "triggers": [
+      {
+        "config": {
+          "cronExpression": "0 0 4 * * *",
+        },
+        "name": "timer-5026b54af0",
+        "type": "timer",
+      },
+    ],
+  },
+]
+`;
+
+exports[`test serverless devs yaml generate fc case analyzeFunction should transform single http trigger 1`] = `
+[
+  {
+    "function": {
+      "handler": "helloService.hello",
+      "name": "helloService-hello",
+    },
+    "functionName": "helloService-hello",
+    "triggers": [
+      {
+        "config": {
+          "methods": [
+            "POST",
+          ],
+        },
+        "name": "http-d9892a5b83",
+        "type": "http",
+      },
+    ],
+  },
+]
+`;
+
+exports[`test serverless devs yaml generate fc case fillYaml should fill yaml with new function 1`] = `
+"services:
+  project1:
+    component: devsapp/fc
+    props:
+      region: cn-hangzhou
+      service: \${vars.service}
+      function:
+        name: helloService-hello
+  project-628a08d1e5:
+    component: devsapp/fc
+    props:
+      region: cn-hangzhou
+      service: \${vars.service}
+      function:
+        handler: helloService.hello
+        name: helloService-hello-other
+      triggers:
+        - config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+          name: http-38245ab0e0
+          type: http
+"
+`;
+
+exports[`test serverless devs yaml generate fc case fillYaml should fill yaml with single function mixin 1`] = `
+"services:
+  project1:
+    component: devsapp/fc
+    props:
+      region: cn-hangzhou
+      service: \${vars.service}
+      function:
+        name: helloService-hello
+        handler: helloService.hello
+      triggers:
+        - config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+          name: http-38245ab0e0
+          type: http
+"
+`;
+
+exports[`test serverless devs yaml generate fc case should test yaml parse and stringify 1`] = `
+"provider:
+  platform: aliyun # 平台
+  component: 'devsapp/fc' # 组件名称
+"
+`;

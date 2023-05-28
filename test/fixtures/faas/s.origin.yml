@@ -1,0 +1,16 @@
+edition: 1.0.0 #  命令行YAML规范版本，遵循语义化版本（Semantic Versioning）规范
+name: ffmpeg-app #  项目名称
+access: default #  秘钥别名
+
+services:
+  fc-deploy-test: # 模块名称
+    component: devsapp/fc # 组件名称
+    props: # 组件的属性值
+      region: cn-qingdao # 地域
+      customDomains: # 自定义域名配置
+        - domainName: auto # 域名，如果是auto取值，系统则会默认分配域名
+          protocol: HTTP # 协议，取值：HTTP, HTTPS, HTTP, HTTPS
+          routeConfigs: # 路由配置
+            - path: /a # 路径
+              serviceName: fc-depice # 服务名
+              functionName: function # 函数名
