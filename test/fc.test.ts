@@ -11,7 +11,7 @@ describe('test serverless devs yaml generate fc case', () => {
 
   describe('analyzeFunction', function() {
     it('should transform single http trigger', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const result = generator.analyzeFunction([{
         'prefix': '/',
         'routerName': '',
@@ -42,7 +42,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should transform multi http trigger with same function', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const result = generator.analyzeFunction([{
         'prefix': '/',
         'routerName': '',
@@ -101,7 +101,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should transform multi trigger mixin', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const result = generator.analyzeFunction([{
         'url': '/hello',
         'requestMethod': 'post',
@@ -153,7 +153,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test http trigger method any', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const result = generator.analyzeFunction([{
         'url': '/hello',
         'requestMethod': 'post',
@@ -174,7 +174,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test http trigger method all', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const result = generator.analyzeFunction([{
         'url': '/hello',
         'requestMethod': 'post',
@@ -195,7 +195,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test unique trigger name', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       expect(() => {
         generator.analyzeFunction([{
           'url': '/hello',
@@ -235,7 +235,7 @@ describe('test serverless devs yaml generate fc case', () => {
 
   describe('fillYaml', function() {
     it('should fill yaml with single function mixin', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const document = generator.fillYaml(new Document({
         services: {
           project1: {
@@ -278,7 +278,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should fill yaml with new function', function() {
-      const generator = new FcGenerator('', '', '');
+      const generator = new FcGenerator({}, '', '');
       const document = generator.fillYaml(new Document({
         services: {
           project1: {

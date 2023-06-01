@@ -5,9 +5,10 @@ import {
   isSeq,
   ParsedNode,
   parseDocument,
-  stringify, YAMLMap
+  stringify,
+  YAMLMap,
 } from 'yaml';
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import {
   MidwayConfigService,
   MidwayFrameworkService,
@@ -19,14 +20,13 @@ import {
   Types,
 } from '@midwayjs/core';
 import { createHash } from 'crypto';
+import { GenerateOptions } from '../interface';
+import { join, resolve } from 'path';
 
 export abstract class BaseGenerator<FunctionConfig = unknown> {
   private document: Document.Parsed<ParsedNode, true>;
   constructor(
-    /**
-     * 基础目录
-     */
-    protected baseDir,
+    protected options: GenerateOptions,
     /**
      * yaml 文件路径
      */
@@ -74,8 +74,8 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
    */
   public async loadFunction() {
     const applicationContext = prepareGlobalApplicationContext({
-      baseDir: this.baseDir,
-      appDir: this.baseDir,
+      baseDir: this.options.baseDir,
+      appDir: this.options.appDir,
     });
     await applicationContext.getAsync(MidwayFrameworkService, [
       applicationContext,
@@ -218,13 +218,28 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
 
 type GeneratorClz = {
   canSupport(baseDir: string): boolean | string[];
-  new (baseDir: string, yamlPath: string, yamlContent: string): {
+  new (options: GenerateOptions, yamlPath: string, yamlContent: string): {
     generate(): void;
   };
 };
 
 export class GeneratorFactory {
-  constructor(protected baseDir: string) {}
+  constructor(protected options: GenerateOptions) {
+    if (!this.options.appDir) {
+      this.options.appDir = process.cwd();
+    } else {
+      this.options.appDir = resolve(this.options.appDir);
+    }
+    if (!this.options.baseDir) {
+      this.options.baseDir = join(this.options.appDir, 'dist');
+    }
+
+    if (!existsSync(this.options.baseDir)) {
+      throw new Error(
+        `The baseDir ${this.options.baseDir} is not exists, please build first.`
+      );
+    }
+  }
   private generators = new Set<GeneratorClz>();
   register(generatorImpl: GeneratorClz) {
     this.generators.add(generatorImpl);
@@ -232,9 +247,13 @@ export class GeneratorFactory {
 
   getGenerator() {
     for (const GeneratorClz of this.generators) {
-      const canSupport = GeneratorClz.canSupport(this.baseDir);
+      const canSupport = GeneratorClz.canSupport(this.options.baseDir);
       if (canSupport) {
-        return new GeneratorClz(this.baseDir, canSupport[0], canSupport[1]);
+        return new GeneratorClz(
+          this.options,
+          canSupport[0],
+          canSupport[1]
+        );
       }
     }
   }

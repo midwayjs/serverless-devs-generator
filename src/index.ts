@@ -1,12 +1,13 @@
 import { GeneratorFactory } from './common/base';
 import { FcGenerator } from './devs/fc';
+import { GenerateOptions } from './interface';
 
 /**
  * 总入口
- * @param baseDir
+ * @param options
  */
-async function generate(baseDir = process.cwd()) {
-  const generatorFactory = new GeneratorFactory(baseDir);
+async function generate(options: GenerateOptions) {
+  const generatorFactory = new GeneratorFactory(options);
   generatorFactory.register(FcGenerator);
   const generator = generatorFactory.getGenerator();
   if (generator) {
