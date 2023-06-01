@@ -5,7 +5,7 @@ import { Document } from 'yaml';
 describe('test base generator', function() {
 
   class TestGenerator extends BaseGenerator {
-    static canSupport(baseDir: string) {
+    static canSupport(options) {
       return true;
     }
 

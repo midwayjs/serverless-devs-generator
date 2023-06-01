@@ -66,8 +66,6 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
           };
         }
 
-        Object.assign(allFunc[funcName], func.functionMetadata);
-
         if (!allFunc[funcName]?.triggers) {
           allFunc[funcName].triggers = [];
         }
@@ -158,7 +156,7 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
               ['props'],
               functionConfig,
               fcComponentNode,
-              ['triggers']
+              ['name']
             );
             // 删除该节点
             result.splice(findFunctionConfigIdx, 1);

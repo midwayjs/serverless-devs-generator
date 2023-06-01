@@ -4,7 +4,9 @@ import { Document } from 'yaml';
 
 describe('test serverless devs yaml generate fc case', () => {
   it('should test yaml parse and stringify', () => {
-    const [file, content] = FcGenerator.canSupport(join(__dirname, './fixtures/base')) as string[];
+    const [file, content] = FcGenerator.canSupport({
+      appDir: join(__dirname, './fixtures/base')
+    }) as string[];
     expect(file).toEqual(join(__dirname, './fixtures/base/s.yaml'));
     expect(content).toMatchSnapshot();
   });
@@ -297,6 +299,59 @@ describe('test serverless devs yaml generate fc case', () => {
           "function": {
             "handler": "helloService.hello",
             "name": "helloService-hello-other",
+          },
+          "triggers": [
+            {
+              "config": {
+                "methods": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                ],
+              },
+              "name": "http-38245ab0e0",
+              "type": "http",
+            },
+          ],
+        },
+      ]);
+
+      expect(document.toString()).toMatchSnapshot();
+    });
+
+    it('should fill yaml if old trigger exists', function() {
+      const generator = new FcGenerator({}, '', '');
+      const document = generator.fillYaml(new Document({
+        services: {
+          project1: {
+            component: 'devsapp/fc',
+            props: {
+              region: 'cn-hangzhou',
+              service: '${vars.service}',
+              function: {
+                name: 'helloService-hello',
+              },
+              "triggers": [
+                {
+                  "config": {
+                    "methods": [
+                      "GET",
+                    ],
+                  },
+                  "name": "http-38245ab0e0",
+                  "type": "http",
+                },
+              ],
+            }
+          }
+        }
+      }), [
+        {
+          "function": {
+            "handler": "helloService.hello",
+            "name": "helloService-hello",
           },
           "triggers": [
             {

@@ -7,7 +7,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should test 
       "handler": "helloService.hello",
       "name": "helloService-hello",
     },
-    "functionName": "helloService-hello",
     "triggers": [
       {
         "config": {
@@ -34,7 +33,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should test 
       "handler": "helloService.hello",
       "name": "helloService-hello",
     },
-    "functionName": "helloService-hello",
     "triggers": [
       {
         "config": {
@@ -61,7 +59,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       "handler": "helloService.hello",
       "name": "helloService-hello",
     },
-    "functionName": "helloService-hello",
     "triggers": [
       {
         "config": {
@@ -93,7 +90,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       "handler": "helloService.hello",
       "name": "helloService-hello",
     },
-    "functionName": "helloService-hello",
     "triggers": [
       {
         "config": {
@@ -120,7 +116,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       "handler": "helloService.timer",
       "name": "helloService-timer",
     },
-    "functionName": "helloService-timer",
     "triggers": [
       {
         "config": {
@@ -141,7 +136,6 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       "handler": "helloService.hello",
       "name": "helloService-hello",
     },
-    "functionName": "helloService-hello",
     "triggers": [
       {
         "config": {
@@ -155,6 +149,29 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
     ],
   },
 ]
+`;
+
+exports[`test serverless devs yaml generate fc case fillYaml should fill yaml if old trigger exists 1`] = `
+"services:
+  project1:
+    component: devsapp/fc
+    props:
+      region: cn-hangzhou
+      service: \${vars.service}
+      function:
+        name: helloService-hello
+        handler: helloService.hello
+      triggers:
+        - config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+          name: http-38245ab0e0
+          type: http
+"
 `;
 
 exports[`test serverless devs yaml generate fc case fillYaml should fill yaml with new function 1`] = `

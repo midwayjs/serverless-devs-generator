@@ -209,15 +209,15 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
 
   /**
    * 检查该 generator 是否能被应用
-   * @param baseDir
+   * @param options
    */
-  static canSupport(baseDir: string): boolean | string[] {
+  static canSupport(options: GenerateOptions): boolean | string[] {
     return false;
   }
 }
 
 type GeneratorClz = {
-  canSupport(baseDir: string): boolean | string[];
+  canSupport(options: GenerateOptions): boolean | string[];
   new (options: GenerateOptions, yamlPath: string, yamlContent: string): {
     generate(): void;
   };
@@ -231,7 +231,12 @@ export class GeneratorFactory {
       this.options.appDir = resolve(this.options.appDir);
     }
     if (!this.options.baseDir) {
-      this.options.baseDir = join(this.options.appDir, 'dist');
+      const tsconfig =
+        require(join(this.options.appDir, 'tsconfig.json')) || {};
+      this.options.baseDir = join(
+        this.options.appDir,
+        tsconfig?.compilerOptions?.outDir || 'dist'
+      );
     }
 
     if (!existsSync(this.options.baseDir)) {
@@ -247,13 +252,9 @@ export class GeneratorFactory {
 
   getGenerator() {
     for (const GeneratorClz of this.generators) {
-      const canSupport = GeneratorClz.canSupport(this.options.baseDir);
+      const canSupport = GeneratorClz.canSupport(this.options);
       if (canSupport) {
-        return new GeneratorClz(
-          this.options,
-          canSupport[0],
-          canSupport[1]
-        );
+        return new GeneratorClz(this.options, canSupport[0], canSupport[1]);
       }
     }
   }

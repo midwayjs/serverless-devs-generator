@@ -10,4 +10,4 @@ const options = process.argv
   }, {});
 
 /** CLI Task Run */
-generate(process.cwd(), options);
+generate(options);

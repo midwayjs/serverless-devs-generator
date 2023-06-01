@@ -12,9 +12,9 @@ async function generate(options: GenerateOptions) {
   const generator = generatorFactory.getGenerator();
   if (generator) {
     await generator.generate();
-    console.log('generate success');
+    console.log('[YAML] Generate success');
   } else {
-    console.warn('no generator found and skip generator');
+    console.warn('[YAML] no generator found and skip generator');
   }
 }
 
