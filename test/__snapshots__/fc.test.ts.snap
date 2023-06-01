@@ -10,6 +10,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should test 
     "triggers": [
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "GET",
             "POST",
@@ -36,6 +37,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should test 
     "triggers": [
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "GET",
             "POST",
@@ -62,6 +64,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
     "triggers": [
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "POST",
           ],
@@ -71,6 +74,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       },
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "GET",
           ],
@@ -93,6 +97,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
     "triggers": [
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "POST",
           ],
@@ -102,6 +107,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
       },
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "GET",
           ],
@@ -139,6 +145,7 @@ exports[`test serverless devs yaml generate fc case analyzeFunction should trans
     "triggers": [
       {
         "config": {
+          "authType": "anonymous",
           "methods": [
             "POST",
           ],
