@@ -109,6 +109,9 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
           func.functionTriggerMetadata.methods = methodList.map(method => {
             return method.toUpperCase();
           });
+
+          func.functionTriggerMetadata.authType =
+            func.functionTriggerMetadata.authType || 'anonymous';
         }
 
         const newTriggerConfig = {};
