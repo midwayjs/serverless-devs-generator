@@ -14,13 +14,12 @@ import {
   MidwayFrameworkService,
   MidwayServerlessFunctionService,
   prepareGlobalApplicationContext,
-  RouterInfo,
   CONFIGURATION_KEY,
   listModule,
   Types,
 } from '@midwayjs/core';
 import { createHash } from 'crypto';
-import { GenerateOptions } from '../interface';
+import { FunctionInformation, GenerateOptions } from '../interface';
 import { join, resolve } from 'path';
 
 export abstract class BaseGenerator<FunctionConfig = unknown> {
@@ -72,7 +71,7 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
    * 获取 midway 装饰器标注的函数信息
    * @returns
    */
-  public async loadFunction() {
+  public async loadFunction(): Promise<FunctionInformation> {
     const applicationContext = prepareGlobalApplicationContext({
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
@@ -93,8 +92,14 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
     const midwayConfigService = applicationContext.get(MidwayConfigService);
 
     return {
-      aggregationMode:
-        midwayConfigService.getConfiguration('faas.aggregationMode') || false,
+      aggregationHttp:
+        midwayConfigService.getConfiguration('faas.aggregationHttp') || false,
+      aggregationHandler:
+        midwayConfigService.getConfiguration('faas.aggregationHandler') ||
+        'index.handler',
+      aggregationFunctionName:
+        midwayConfigService.getConfiguration('faas.aggregationFunctionName') ||
+        'http-index',
       functionList: await midwayServerlessFunctionService.getFunctionList(),
     };
   }
@@ -102,9 +107,12 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
   public async generate() {
     this.document = parseDocument(this.yamlContent);
     const data = await this.loadFunction();
-    const result = this.analyzeFunction(data.functionList);
+    const result = this.analyzeFunction(data);
+    await this.generateEntry(data, result);
     const newYaml = this.fillYaml(this.document, result);
-    writeFileSync(this.yamlPath, stringify(newYaml, { indent: 2 }));
+    if (newYaml) {
+      writeFileSync(this.yamlPath, stringify(newYaml, { indent: 2 }));
+    }
   }
 
   /**
@@ -201,11 +209,15 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
     return document;
   }
 
-  abstract analyzeFunction(result: RouterInfo[]): FunctionConfig[];
+  abstract analyzeFunction(result: FunctionInformation): FunctionConfig[];
   abstract fillYaml(
     document: Document.Parsed<any, true>,
     result: FunctionConfig[]
-  ): Document | Document.Parsed<any, true> | YAMLMap;
+  ): Document | Document.Parsed<any, true> | YAMLMap | undefined;
+  abstract generateEntry(
+    information: FunctionInformation,
+    config: FunctionConfig[]
+  ): Promise<void>;
 
   /**
    * 检查该 generator 是否能被应用

@@ -1,6 +1,8 @@
 import { Document, visit, Scalar, YAMLMap } from 'yaml';
-import { RouterInfo } from '@midwayjs/core';
 import { ServerlessDevsGenerator } from '../common/devs';
+import { FunctionInformation } from '../interface';
+import { join } from 'path';
+import { existsSync, writeFileSync } from 'fs';
 
 type FunctionConfig = {
   function: {
@@ -24,12 +26,12 @@ type FunctionConfig = {
 };
 
 export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
-  analyzeFunction(result: RouterInfo[]) {
+  analyzeFunction(result: FunctionInformation) {
     const allFunc: {
       [functionName: string]: FunctionConfig;
     } = {};
-    if (Array.isArray(result)) {
-      for (const func of result) {
+    if (Array.isArray(result.functionList)) {
+      for (const func of result.functionList) {
         if (!func.functionTriggerName) {
           if (func.fullUrl && func.requestMethod && func.funcHandlerName) {
             func.functionTriggerName = 'http';
@@ -224,5 +226,31 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
 
   static isPlatformSupport(file): boolean {
     return /devsapp\/fc/.test(file);
+  }
+
+  async generateEntry(
+    information: FunctionInformation,
+    config: FunctionConfig[]
+  ): Promise<void> {
+    const tpl = `
+const { join } = require('path');
+const { BootstrapStarter } = require('@midwayjs/fc-starter');
+const starter = new BootstrapStarter();
+
+module.exports = starter.start({
+  appDir: __dirname,
+  initializeMethodName: 'initializer',
+});
+    `;
+
+    for (const funcInfo of config) {
+      // 根据 handler 生成统一的入口文件
+      const handler = funcInfo.function.handler;
+      const filePrefix = handler.split('.')[0];
+      const file = join(this.options.appDir, `${filePrefix}.js`);
+      if (!existsSync(file)) {
+        writeFileSync(join(this.options.appDir, `${filePrefix}.js`), tpl);
+      }
+    }
   }
 }

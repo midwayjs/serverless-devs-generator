@@ -17,9 +17,6 @@ export class HelloService {
     path: '/hello',
     method: 'post'
   })
-  @ServerlessTrigger(ServerlessTriggerType.TIMER, {
-    cronExpression: '0 0 4 * * *',
-  })
   async hello(name) {
     return `hello ${name}`;
   }

@@ -1,6 +1,7 @@
 import { BaseGenerator } from '../src/common/base';
 import { join } from 'path';
 import { Document } from 'yaml';
+import { FunctionInformation } from '../src/interface';
 
 describe('test base generator', function() {
 
@@ -14,6 +15,10 @@ describe('test base generator', function() {
     }
 
     fillYaml(document): any {
+    }
+
+    generateEntry(information: FunctionInformation, config: unknown[]): Promise<void> {
+      return Promise.resolve(undefined);
     }
   }
 
