@@ -10,4 +10,11 @@ const options = process.argv
   }, {});
 
 /** CLI Task Run */
-generate(options);
+generate(options)
+  .then(() => {
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error(err.message);
+    process.exit(1);
+  });

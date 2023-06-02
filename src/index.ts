@@ -1,6 +1,7 @@
 import { GeneratorFactory } from './common/base';
-import { FcGenerator } from './devs/fc';
 import { GenerateOptions } from './interface';
+import { FcGenerator } from './devs/fc';
+import { GaiaGenerator } from './gaia';
 
 /**
  * 总入口
@@ -9,6 +10,7 @@ import { GenerateOptions } from './interface';
 async function generate(options: GenerateOptions) {
   const generatorFactory = new GeneratorFactory(options);
   generatorFactory.register(FcGenerator);
+  generatorFactory.register(GaiaGenerator);
   const generator = generatorFactory.getGenerator();
   if (generator) {
     await generator.generate();
