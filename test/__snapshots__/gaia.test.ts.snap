@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test/gaia.test.ts should generate spec.yml from f.yml 1`] = `
+"provider:
+  name: gaia
+  starter: '@ali/midway-gaia-starter'
+
+sidecar:
+  - a
+  - b
+trigger-http:
+  path: /*
+  method: get
+trigger-mtop:
+  toObject: true
+"
+`;
+
+exports[`test/gaia.test.ts should generate spec.yml from f.yml 2`] = `
+"provider:
+  name: gaia
+  starter: '@ali/midway-gaia-starter'
+
+sidecar:
+  - a
+  - b
+trigger-hsf: {}
+trigger-mtop: {}
+"
+`;

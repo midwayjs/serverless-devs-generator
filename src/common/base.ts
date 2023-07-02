@@ -22,7 +22,7 @@ import { createHash } from 'crypto';
 import { FunctionInformation, GenerateOptions } from '../interface';
 import { join, resolve } from 'path';
 
-export abstract class BaseGenerator<FunctionConfig = unknown> {
+export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   private document: Document.Parsed<ParsedNode, true>;
   constructor(
     protected options: GenerateOptions,
@@ -209,14 +209,16 @@ export abstract class BaseGenerator<FunctionConfig = unknown> {
     return document;
   }
 
-  abstract analyzeFunction(result: FunctionInformation): FunctionConfig[];
+  abstract analyzeFunction(
+    result: FunctionInformation
+  ): AnalyzeFunctionResult | AnalyzeFunctionResult[];
   abstract fillYaml(
     document: Document.Parsed<any, true>,
-    result: FunctionConfig[]
+    result: AnalyzeFunctionResult | AnalyzeFunctionResult[]
   ): Document | Document.Parsed<any, true> | YAMLMap | undefined;
   abstract generateEntry(
     information: FunctionInformation,
-    config: FunctionConfig[]
+    config: AnalyzeFunctionResult | AnalyzeFunctionResult[]
   ): Promise<void>;
 
   /**

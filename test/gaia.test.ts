@@ -20,10 +20,14 @@ describe('test/gaia.test.ts', function() {
     }, join(appDir, 'f.yml'), readFileSync(join(appDir, 'f.yml'), 'utf-8'));
     await generator.generate();
 
-    expect(existsSync(join(appDir, 'helloService.js'))).toBeTruthy();
+    expect(existsSync(join(appDir, 'index.js'))).toBeTruthy();
     expect(existsSync(join(appDir, 'spec.yml'))).toBeTruthy();
+    expect(readFileSync(join(appDir, 'spec.index.handler.yml'), 'utf-8')).toMatchSnapshot();
+    expect(readFileSync(join(appDir, 'spec.index.hello.yml'), 'utf-8')).toMatchSnapshot();
 
-    unlinkSync(join(appDir, 'helloService.js'));
+    unlinkSync(join(appDir, 'index.js'));
     unlinkSync(join(appDir, 'spec.yml'));
+    unlinkSync(join(appDir, 'spec.index.handler.yml'));
+    unlinkSync(join(appDir, 'spec.index.hello.yml'));
   });
 });
