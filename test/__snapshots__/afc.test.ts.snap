@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test/afc.test.ts should generate from aggr 1`] = `
+"provider:
+  name: aliyun
+  runtime: alinode7
+  starter: '@ali/midway-fc-starter'
+
+aggregation:
+  allEvent:
+    eventTrigger: true
+    functionsPattern:
+      - '*'
+  allHttp:
+    functionsPattern:
+      - '*'
+custom:
+  customDomain:
+    domainName: abc.def.com
+functions:
+  allEvent:
+    handler: allEvent.handler
+    events:
+      - os:
+          bucket: test
+          events: test
+          filter:
+            prefix: ""
+            suffix: ""
+      - hsf: {}
+  allHttp:
+    handler: allHttp.handler
+    events:
+      - http:
+          method: any
+          path: /trigger/*
+"
+`;
+
+exports[`test/afc.test.ts should generate from aggr with ignore 1`] = `
+"provider:
+  name: aliyun
+  runtime: alinode7
+  starter: '@ali/midway-fc-starter'
+
+aggregation:
+  api:
+    functionsPattern:
+      - api*
+  renderNot2:
+    functionsPattern:
+      - render*
+      - '!render2'
+  normal:
+    functions:
+      - normal1
+      - normal2
+    functionsPattern:
+      # skip pattern, use functions
+      - '!normal*'
+custom:
+  customDomain:
+    domainName: abc.def.com
+functions:
+  render2:
+    handler: render2.handler
+    events:
+      - http:
+          path: /render/2
+          method: get
+  api:
+    handler: api.handler
+    events:
+      - http:
+          method: any
+          path: /api/*
+  renderNot2:
+    handler: renderNot2.handler
+    events:
+      - http:
+          method: any
+          path: /*
+  normal:
+    handler: normal.handler
+    events:
+      - http:
+          method: any
+          path: /normal/*
+"
+`;

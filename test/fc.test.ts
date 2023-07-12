@@ -260,7 +260,6 @@ describe('test serverless devs yaml generate fc case', () => {
               function: {
                 name: 'helloService-hello',
               },
-
             }
           }
         }

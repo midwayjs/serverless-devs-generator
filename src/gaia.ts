@@ -80,7 +80,10 @@ export class GaiaGenerator extends BaseGenerator<FunctionConfig> {
     }
   }
 
-  async generateEntry(information: FunctionInformation, config: any[]) {
+  async generateEntry(
+    information: FunctionInformation,
+    result: FunctionConfig[]
+  ) {
     const tpl = `const { join } = require('path');
 const { BootstrapStarter } = require('@ali/midway-gaia-starter');
 const starter = new BootstrapStarter();

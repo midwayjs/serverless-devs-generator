@@ -23,7 +23,7 @@ import { FunctionInformation, GenerateOptions } from '../interface';
 import { join, resolve } from 'path';
 
 export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
-  private document: Document.Parsed<ParsedNode, true>;
+  protected document: Document.Parsed<ParsedNode, true>;
   constructor(
     protected options: GenerateOptions,
     /**
@@ -109,7 +109,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
     const data = await this.loadFunction();
     const result = this.analyzeFunction(data);
     await this.generateEntry(data, result);
-    const newYaml = this.fillYaml(this.document, result);
+    const newYaml = await this.fillYaml(this.document, result);
     if (newYaml) {
       writeFileSync(this.yamlPath, stringify(newYaml, { indent: 2 }));
     }
@@ -215,7 +215,12 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   abstract fillYaml(
     document: Document.Parsed<any, true>,
     result: AnalyzeFunctionResult | AnalyzeFunctionResult[]
-  ): Document | Document.Parsed<any, true> | YAMLMap | undefined;
+  ):
+    | Document
+    | Document.Parsed<any, true>
+    | YAMLMap
+    | undefined
+    | Promise<Document | Document.Parsed<any> | YAMLMap | undefined>;
   abstract generateEntry(
     information: FunctionInformation,
     config: AnalyzeFunctionResult | AnalyzeFunctionResult[]
