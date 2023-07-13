@@ -7,10 +7,7 @@ import * as micromatch from 'micromatch';
 import { format } from 'util';
 
 type FunctionConfig = {
-  function: {
-    name?: string;
-    handler?: string;
-  };
+  functionName?: string;
   handler?: string;
   events?: Array<{
     [type: 'http' | 'timer' | 'hsf' | 'mtop' | 'mq' | string]: any;
@@ -133,10 +130,8 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
 
         if (!allFunc[funcName]) {
           allFunc[funcName] = {
-            function: {
-              name: funcName,
-              handler,
-            },
+            functionName: funcName,
+            handler,
             events: [],
           };
         }
@@ -145,8 +140,8 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
           allFunc[funcName].events = [];
         }
 
-        if (!allFunc[funcName]?.function.handler) {
-          allFunc[funcName].function.handler = handler;
+        if (!allFunc[funcName]?.handler) {
+          allFunc[funcName].handler = handler;
         }
 
         delete func.functionTriggerMetadata.functionName;
@@ -190,7 +185,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     const aggregationInformation =
       (this.document.get('aggregation') as YAMLMap).toJSON() || {};
 
-    let allFuncNames = result.map(func => func.function.name);
+    let allFuncNames = result.map(func => func.functionName);
 
     for (const aggregationName in aggregationInformation) {
       const aggregationConfig = aggregationInformation[aggregationName];
@@ -215,7 +210,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
         const matchedFuncName = [];
         const notMatchedFuncName = [];
         for (const functionName of allFuncNames) {
-          const func = result.find(func => func.function.name === functionName);
+          const func = result.find(func => func.functionName === functionName);
           const isHttpFunction = func.events?.find(event => {
             return Object.keys(event)[0] === 'http';
           });
@@ -229,22 +224,22 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
             isMatch = false;
           } else if (aggregationConfig.functions) {
             isMatch =
-              aggregationConfig.functions.indexOf(func.function.name) !== -1;
+              aggregationConfig.functions.indexOf(func.functionName) !== -1;
           } else if (aggregationConfig.functionsPattern) {
             isMatch = micromatch.all(
-              func.function.name,
+              func.functionName,
               aggregationConfig.functionsPattern
             );
           }
           if (isMatch) {
-            matchedFuncName.push(func.function.name);
+            matchedFuncName.push(func.functionName);
           } else {
-            notMatchedFuncName.push(func.function.name);
+            notMatchedFuncName.push(func.functionName);
           }
         }
         allFuncNames = notMatchedFuncName;
         matchedFuncName.forEach((functionName: string) => {
-          const func = result.find(func => func.function.name === functionName);
+          const func = result.find(func => func.functionName === functionName);
           if (!func || !func.events) {
             return;
           }
@@ -282,7 +277,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
 
               // remove function from result
               const index = result.findIndex(
-                func => func.function.name === functionName
+                func => func.functionName === functionName
               );
               if (index !== -1) {
                 result.splice(index, 1);
@@ -351,8 +346,8 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
 
     // 填充新的函数信息
     for (const functionConfig of result) {
-      cloned.addIn(['functions', functionConfig.function.name], {
-        handler: functionConfig.function.handler,
+      cloned.addIn(['functions', functionConfig.functionName], {
+        handler: functionConfig.functionName,
         events: functionConfig.events,
       });
     }
@@ -365,7 +360,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
 
     // 写一个所有函数名+handler的文件，方便脚本处理
     const allFunctionNames = result.map(
-      func => `${func.function.name}_${func.function.handler}`
+      func => `${func.functionName}_${func.handler}`
     );
     writeFileSync(
       join(this.options.appDir, 'all_function_name'),
@@ -464,7 +459,7 @@ module.exports = starter.start({
       // 根据 handler 生成统一的入口文件
       const file = join(
         this.options.appDir,
-        `${funcInfo.function.name}.entry.js`
+        `${funcInfo.functionName}.entry.js`
       );
 
       if (!existsSync(file)) {
@@ -472,11 +467,7 @@ module.exports = starter.start({
           const handlers = formatAggregationHandlers(funcInfo._handlers) || [];
           writeFileSync(
             file,
-            format(
-              aggrTpl,
-              funcInfo.function.name,
-              JSON.stringify(handlers, null, 2)
-            )
+            format(aggrTpl, funcInfo.handler, JSON.stringify(handlers, null, 2))
           );
         } else {
           writeFileSync(file, tpl);

@@ -1,6 +1,6 @@
 {
   "name": "@midwayjs/serverless-yaml-generator",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Generate function information for serverless devs",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
