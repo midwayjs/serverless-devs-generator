@@ -136,6 +136,10 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
           };
         }
 
+        if (!allFunc[funcName].functionName) {
+          allFunc[funcName].functionName = funcName;
+        }
+
         if (!allFunc[funcName]?.events) {
           allFunc[funcName].events = [];
         }
@@ -192,10 +196,8 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
       const aggregationFuncName = this.getAggregationFunName(aggregationName);
 
       const aggregationFunc = {
-        function: {
-          name: aggregationFuncName,
-          handler: `${aggregationFuncName}.handler`,
-        },
+        functionName: aggregationFuncName,
+        handler: `${aggregationFuncName}.handler`,
         _isAggregation: true,
         events: [],
       } as FunctionConfig;
@@ -347,7 +349,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     // 填充新的函数信息
     for (const functionConfig of result) {
       cloned.addIn(['functions', functionConfig.functionName], {
-        handler: functionConfig.functionName,
+        handler: functionConfig.handler,
         events: functionConfig.events,
       });
     }
