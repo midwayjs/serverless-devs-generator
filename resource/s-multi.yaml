@@ -1,0 +1,25 @@
+edition: 1.0.0          #  命令行YAML规范版本，遵循语义化版本（Semantic Versioning）规范
+name: fcDeployApp       #  项目名称
+access: "default"  #  秘钥别名
+
+vars:
+  service:
+    name: fc-build-demo
+    description: 'demo for fc-deploy component'
+services:
+  project1:
+    component: devsapp/fc  # 组件名称
+    props: #  组件的属性值
+      region: cn-hangzhou
+      service: ${vars.service}
+      function:
+        name: py-event-function-1
+        description: this is a test
+  project2:
+    component: devsapp/fc  # 组件名称
+    props: #  组件的属性值
+      region: cn-hangzhou
+      service: ${vars.service}
+      function:
+        name: py-event-function-2
+        description: this is a test

@@ -1,2 +1,2 @@
-# serverless-devs-generator
-Generate function information for serverless devs
+# serverless-yaml-generator
+Generate function information for serverless with midway function

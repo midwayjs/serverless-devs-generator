@@ -1,0 +1,7 @@
+provider:
+  name: gaia
+  starter: '@ali/midway-gaia-starter'
+
+sidecar:
+  - a
+  - b
