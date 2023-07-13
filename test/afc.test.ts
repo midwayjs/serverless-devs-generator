@@ -20,7 +20,7 @@ describe('test/afc.test.ts', function() {
 
   it('should generate f.total.yml from f.yml', async() => {
     const appDir = join(__dirname, './fixtures/afc');
-    cleanFiles(appDir, ['f.total.yml', 'index.js']);
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'app.entry.js', 'helloService-hello1.entry.js']);
     const generator = new AliFCGenerator({
       appDir,
       baseDir: join(appDir, 'src')
@@ -28,13 +28,13 @@ describe('test/afc.test.ts', function() {
     await generator.generate();
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
-    expect(existsSync(join(appDir, 'index.js'))).toBeTruthy();
-    cleanFiles(appDir, ['f.total.yml', 'index.js']);
+    expect(existsSync(join(appDir, 'app.entry.js'))).toBeTruthy();
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'app.entry.js', 'helloService-hello1.entry.js']);
   });
 
   it('should generate from aggr', async() => {
     const appDir = join(__dirname, './fixtures/afc-aggr');
-    cleanFiles(appDir, ['f.total.yml', 'allEvent.js', 'allHttp.js']);
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'allEvent.entry.js', 'allHttp.entry.js']);
     const generator = new AliFCGenerator({
       appDir,
       baseDir: join(appDir, 'src')
@@ -42,15 +42,15 @@ describe('test/afc.test.ts', function() {
     await generator.generate();
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
-    expect(existsSync(join(appDir, 'allEvent.js'))).toBeTruthy();
+    expect(existsSync(join(appDir, 'allEvent.entry.js'))).toBeTruthy();
     expect(readFileSync(join(appDir, 'f.total.yml'), 'utf-8')).toMatchSnapshot();
 
-    cleanFiles(appDir, ['f.total.yml', 'allEvent.js', 'allHttp.js']);
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'allEvent.entry.js', 'allHttp.entry.js']);
   });
 
   it('should generate from aggr with ignore', async() => {
     const appDir = join(__dirname, './fixtures/afc-aggr-ignore');
-    cleanFiles(appDir, ['f.total.yml', 'api.js', 'normal.js', 'render2.js', 'renderNot2.js']);
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'api.entry.js', 'normal.entry.js', 'render2.entry.js', 'renderNot2.entry.js']);
 
     const generator = new AliFCGenerator({
       appDir,
@@ -61,6 +61,6 @@ describe('test/afc.test.ts', function() {
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
     expect(readFileSync(join(appDir, 'f.total.yml'), 'utf-8')).toMatchSnapshot();
 
-    cleanFiles(appDir, ['f.total.yml', 'api.js', 'normal.js', 'render2.js', 'renderNot2.js']);
+    cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'api.entry.js', 'normal.entry.js', 'render2.entry.js', 'renderNot2.entry.js']);
   });
 });

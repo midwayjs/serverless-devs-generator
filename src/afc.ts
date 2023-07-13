@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { FunctionInformation } from './interface';
 import * as micromatch from 'micromatch';
+import { format } from 'util';
 
 type FunctionConfig = {
   function: {
@@ -14,6 +15,9 @@ type FunctionConfig = {
   events?: Array<{
     [type: 'http' | 'timer' | 'hsf' | 'mtop' | 'mq' | string]: any;
   }>;
+  _isAggregation?: boolean;
+  _handlers?: string[];
+  _allAggred?: any[];
 };
 
 function commonPrefixUtil(str1: string, str2: string): string {
@@ -28,6 +32,51 @@ function commonPrefixUtil(str1: string, str2: string): string {
     result += str1[i];
   }
   return result;
+}
+
+function formatAggregationHandlers(handlers) {
+  if (!handlers || !handlers.length) {
+    return [];
+  }
+  return handlers
+    .map(handler => {
+      const { path = '', eventType } = handler;
+      if (eventType !== 'http') {
+        return {
+          ...handler,
+          level: -1,
+        };
+      }
+      return {
+        ...handler,
+        method: (handler.method ? [].concat(handler.method) : []).map(
+          method => {
+            return method.toLowerCase();
+          }
+        ),
+        handler: handler.handler,
+        router: path.replace(/\*/g, '**'), // picomatch use **
+        pureRouter: path.replace(/\**$/, ''),
+        regRouter: path.replace(/\/\*$/, '/(.*)?') || '/(.*)?', // path2regexp match use (.*)?
+        level: path.split('/').length - 1,
+        paramsMatchLevel: path.indexOf('/:') !== -1 ? 1 : 0,
+      };
+    })
+    .sort((handlerA, handlerB) => {
+      if (handlerA.level === handlerB.level) {
+        if (handlerA.level < 0) {
+          return -1;
+        }
+        if (handlerB.pureRouter === handlerA.pureRouter) {
+          return handlerA.router.length - handlerB.router.length;
+        }
+        if (handlerA.paramsMatchLevel === handlerB.paramsMatchLevel) {
+          return handlerB.pureRouter.length - handlerA.pureRouter.length;
+        }
+        return handlerA.paramsMatchLevel - handlerB.paramsMatchLevel;
+      }
+      return handlerB.level - handlerA.level;
+    });
 }
 
 export function commonPrefix(arr: string[]): string {
@@ -154,7 +203,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
         },
         _isAggregation: true,
         events: [],
-      } as any;
+      } as FunctionConfig;
 
       // 忽略原始方法，不再单独进行部署
       const deployOrigin = aggregationConfig.deployOrigin;
@@ -293,6 +342,12 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     result: FunctionConfig[]
   ) {
     const cloned = document.clone();
+    const serviceName = cloned.hasIn(['service', 'name']);
+    if (!serviceName && cloned.has('service')) {
+      const name = cloned.get('service');
+      cloned.delete('service');
+      cloned.setIn(['service', 'name'], name);
+    }
 
     // 填充新的函数信息
     for (const functionConfig of result) {
@@ -305,6 +360,16 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     writeFileSync(
       join(this.options.appDir, 'f.total.yml'),
       stringify(cloned),
+      'utf8'
+    );
+
+    // 写一个所有函数名+handler的文件，方便脚本处理
+    const allFunctionNames = result.map(
+      func => `${func.function.name}_${func.function.handler}`
+    );
+    writeFileSync(
+      join(this.options.appDir, 'all_function_name'),
+      allFunctionNames.join(':'),
       'utf8'
     );
 
@@ -333,6 +398,57 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     information: FunctionInformation,
     result: FunctionConfig[]
   ) {
+    const aggrTpl = `const { join } = require('path');
+const { BootstrapStarter } = require('@ali/midway-fc-starter');
+const starter = new BootstrapStarter();
+
+module.exports = starter.start({
+  appDir: __dirname,
+  baseDir: join(__dirname, 'dist'),
+  initializeMethodName: 'initializer',
+  aggregationHandlerName: '%s',
+  handlerNameMapping: (handlerName, event, context, oldContext) => {
+    const allHandlers = %s;
+    if (typeof allHandlers !== 'undefined') {
+      let newEvent = event;
+      // 阿里云事件触发器，入参是 buffer
+      if (Buffer.isBuffer(newEvent)) {
+        newEvent = newEvent.toString('utf8');
+        try {
+          newEvent = JSON.parse(newEvent);
+        } catch (_err) {
+          /** ignore */
+        }
+      }
+      // hsf
+      if (newEvent && newEvent.func) {
+        const handlerInfo = allHandlers.find(handler => {
+          return handler.functionName === newEvent.func;
+        });
+        if (handlerInfo) {
+          return [handlerInfo.handler, Buffer.from(JSON.stringify(newEvent.event)), context, oldContext];
+        }
+      }
+      // mtop
+      if (newEvent && newEvent.mtopApp && newEvent.parameters && newEvent.parameters.fcArgs) {
+        const fcArgs = JSON.parse(newEvent.parameters.fcArgs);
+        if (fcArgs.func) {
+          const handlerInfo = allHandlers.find(handler => {
+            return handler.functionName === fcArgs.func;
+          });
+          if (handlerInfo) {
+            newEvent.parameters.fcArgs = JSON.stringify(fcArgs.event);
+            newEvent.parameters.fcName = handlerInfo.functionName;
+            return [handlerInfo.handler, Buffer.from(JSON.stringify(newEvent)), context, oldContext];
+          }
+        }
+      }
+    }
+    return [handlerName, event, context, oldContext];
+  },
+});
+`;
+
     const tpl = `const { join } = require('path');
 const { BootstrapStarter } = require('@ali/midway-fc-starter');
 const starter = new BootstrapStarter();
@@ -346,11 +462,25 @@ module.exports = starter.start({
 
     for (const funcInfo of result) {
       // 根据 handler 生成统一的入口文件
-      const handler = funcInfo.function.handler;
-      const filePrefix = handler.split('.')[0];
-      const file = join(this.options.appDir, `${filePrefix}.js`);
+      const file = join(
+        this.options.appDir,
+        `${funcInfo.function.name}.entry.js`
+      );
+
       if (!existsSync(file)) {
-        writeFileSync(join(this.options.appDir, `${filePrefix}.js`), tpl);
+        if (funcInfo._isAggregation) {
+          const handlers = formatAggregationHandlers(funcInfo._handlers) || [];
+          writeFileSync(
+            file,
+            format(
+              aggrTpl,
+              funcInfo.function.name,
+              JSON.stringify(handlers, null, 2)
+            )
+          );
+        } else {
+          writeFileSync(file, tpl);
+        }
       }
     }
   }

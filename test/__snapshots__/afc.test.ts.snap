@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`test/afc.test.ts should generate from aggr 1`] = `
-"provider:
+"
+provider:
   name: aliyun
   runtime: alinode7
   starter: '@ali/midway-fc-starter'
@@ -17,22 +18,24 @@ aggregation:
 custom:
   customDomain:
     domainName: abc.def.com
+service:
+  name: test
 functions:
   allEvent:
     handler: allEvent.handler
     events:
-      - os:
-          bucket: test
-          events: test
-          filter:
-            prefix: ""
-            suffix: ""
-      - hsf: {}
+      - os: true
+      - hsf: true
   allHttp:
     handler: allHttp.handler
     events:
       - http:
-          method: any
+          method:
+            - get
+            - post
+            - put
+            - delete
+            - head
           path: /trigger/*
 "
 `;
@@ -72,19 +75,34 @@ functions:
     handler: api.handler
     events:
       - http:
-          method: any
+          method:
+            - get
+            - post
+            - put
+            - delete
+            - head
           path: /api/*
   renderNot2:
     handler: renderNot2.handler
     events:
       - http:
-          method: any
+          method:
+            - get
+            - post
+            - put
+            - delete
+            - head
           path: /*
   normal:
     handler: normal.handler
     events:
       - http:
-          method: any
+          method:
+            - get
+            - post
+            - put
+            - delete
+            - head
           path: /normal/*
 "
 `;
