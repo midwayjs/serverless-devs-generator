@@ -29,6 +29,7 @@ describe('test/afc.test.ts', function() {
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
     expect(existsSync(join(appDir, 'app.entry.js'))).toBeTruthy();
+    expect(readFileSync(join(appDir, 'f.total.yml'), 'utf-8')).toMatchSnapshot();
     cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'app.entry.js', 'helloService-hello1.entry.js']);
   });
 

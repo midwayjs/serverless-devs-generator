@@ -1,5 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`test/afc.test.ts should generate f.total.yml from f.yml 1`] = `
+"provider:
+  name: aliyun
+  runtime: alinode7
+  starter: '@ali/midway-fc-starter'
+
+aggregation:
+  app:
+    functionsPattern:
+      - '*'
+
+custom:
+  customDomain:
+    domainName: abc.def.com
+functions:
+  helloService-hello1:
+    handler: index.hello
+    events:
+      - hsf: true
+      - mtop: true
+  helloService-hello2:
+    handler: helloService.hello2
+    events:
+      - mq:
+          topic: xxxx
+          tags: "*"
+      - timer:
+          type: cron
+          value: 0 0 4 * * *
+  app:
+    handler: app.handler
+    events:
+      - http:
+          method:
+            - get
+            - post
+            - put
+            - delete
+            - head
+          path: /*
+"
+`;
+
 exports[`test/afc.test.ts should generate from aggr 1`] = `
 "
 provider:
@@ -24,7 +67,12 @@ functions:
   allEvent:
     handler: allEvent.handler
     events:
-      - os: true
+      - os:
+          bucket: test
+          events: test
+          filter:
+            prefix: ""
+            suffix: ""
       - hsf: true
   allHttp:
     handler: allHttp.handler

@@ -20,14 +20,6 @@ export class HelloService {
     path: '/hello',
     method: 'post'
   })
-  @ServerlessTrigger(ServerlessTriggerType.TIMER, {
-    type: 'cron',
-    value: '0 0 4 * * *',
-  })
-  @ServerlessTrigger(ServerlessTriggerType.MQ, {
-    topic: 'xxxx',
-    tags: '*',
-  })
   async hello(name) {
     return `hello ${name}`;
   }
@@ -39,5 +31,16 @@ export class HelloService {
   @ServerlessTrigger(ServerlessTriggerType.HSF)
   async hello1(name) {
     return `hello ${name}`;
+  }
+
+  @ServerlessTrigger(ServerlessTriggerType.TIMER, {
+    type: 'cron',
+    value: '0 0 4 * * *',
+  })
+  @ServerlessTrigger(ServerlessTriggerType.MQ, {
+    topic: 'xxxx',
+    tags: '*',
+  })
+  async hello2(name) {
   }
 }
