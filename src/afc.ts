@@ -171,10 +171,10 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
         }
 
         const obj = {};
-        if (triggerType === 'http') {
-          obj[triggerType] = newTriggerConfig;
-        } else {
+        if (['hsf', 'mtop'].includes(triggerType)) {
           obj[triggerType] = true;
+        } else {
+          obj[triggerType] = newTriggerConfig;
         }
         allFunc[funcName].events.push(obj);
       }
