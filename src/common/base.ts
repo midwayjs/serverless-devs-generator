@@ -72,7 +72,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
    * @returns
    */
   public async loadFunction(): Promise<FunctionInformation> {
-    const applicationContext = prepareGlobalApplicationContext({
+    const applicationContext = await prepareGlobalApplicationContext({
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
     });
