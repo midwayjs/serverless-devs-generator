@@ -22,4 +22,4 @@ async function generate(options: GenerateOptions) {
   }
 }
 
-export { generate, FcGenerator };
+export { generate, FcGenerator, AliFCGenerator, GaiaGenerator };
