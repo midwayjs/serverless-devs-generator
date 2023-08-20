@@ -23,3 +23,4 @@ async function generate(options: GenerateOptions) {
 }
 
 export { generate, FcGenerator, AliFCGenerator, GaiaGenerator };
+export * from './util';
