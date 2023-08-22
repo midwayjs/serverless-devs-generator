@@ -143,7 +143,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     // use picomatch to match url
     const allAggregationPaths = [];
     const aggregationInformation =
-      (this.document.get('aggregation') as YAMLMap).toJSON() || {};
+      (this.document.get('aggregation') as YAMLMap)?.toJSON() || {};
 
     let allFuncNames = result.map(func => func.functionName);
 

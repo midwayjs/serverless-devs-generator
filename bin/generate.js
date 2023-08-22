@@ -15,6 +15,6 @@ generate(options)
     process.exit(0);
   })
   .catch(err => {
-    console.error(err.message);
+    console.error(err);
     process.exit(1);
   });
