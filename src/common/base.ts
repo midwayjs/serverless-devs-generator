@@ -9,15 +9,6 @@ import {
   YAMLMap,
 } from 'yaml';
 import { existsSync, writeFileSync } from 'fs';
-import {
-  MidwayConfigService,
-  MidwayFrameworkService,
-  MidwayServerlessFunctionService,
-  prepareGlobalApplicationContext,
-  CONFIGURATION_KEY,
-  listModule,
-  Types,
-} from '@midwayjs/core';
 import { createHash } from 'crypto';
 import { FunctionInformation, GenerateOptions } from '../interface';
 import { join, resolve } from 'path';
@@ -72,6 +63,15 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
    * @returns
    */
   public async loadFunction(): Promise<FunctionInformation> {
+    const {
+      MidwayConfigService,
+      MidwayFrameworkService,
+      MidwayServerlessFunctionService,
+      prepareGlobalApplicationContext,
+      CONFIGURATION_KEY,
+      listModule,
+      Types,
+    } = require('@midwayjs/core');
     const applicationContext = await prepareGlobalApplicationContext({
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
