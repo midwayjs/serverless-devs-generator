@@ -304,10 +304,12 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
 
     // 填充新的函数信息
     for (const functionConfig of result) {
-      cloned.addIn(['functions', functionConfig.functionName], {
-        handler: functionConfig.handler,
-        events: functionConfig.events,
-      });
+      if (!cloned.hasIn(['functions', functionConfig.functionName])) {
+        cloned.addIn(['functions', functionConfig.functionName], {
+          handler: functionConfig.handler,
+          events: functionConfig.events,
+        });
+      }
     }
 
     writeFileSync(
