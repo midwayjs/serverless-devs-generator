@@ -3,6 +3,7 @@ import type { RouterInfo } from '@midwayjs/core';
 export interface GenerateOptions {
   baseDir?: string;
   appDir?: string;
+  pkgJSON?: any;
 }
 
 export interface FunctionInformation {

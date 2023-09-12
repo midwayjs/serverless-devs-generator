@@ -232,8 +232,7 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
     information: FunctionInformation,
     config: FunctionConfig[]
   ): Promise<void> {
-    const tpl = `
-const { join } = require('path');
+    let tpl = `
 const { BootstrapStarter } = require('@midwayjs/fc-starter');
 const starter = new BootstrapStarter();
 
@@ -241,7 +240,22 @@ module.exports = starter.start({
   appDir: __dirname,
   initializeMethodName: 'initializer',
 });
-    `;
+`;
+
+    const isESM = this.options.pkgJSON?.type === 'module';
+    if (isESM) {
+      tpl = `
+import { BootstrapStarter } from '@midwayjs/fc-starter';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const starter = new BootstrapStarter();
+
+export default starter.start({
+  appDir: dirname(fileURLToPath(import.meta.url)),
+  initializeMethodName: 'initializer',
+});
+`;
+    }
 
     for (const funcInfo of config) {
       // 根据 handler 生成统一的入口文件

@@ -71,16 +71,10 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       CONFIGURATION_KEY,
       listModule,
       Types,
-      loadModule,
     } = require('@midwayjs/core');
 
-    const pkgJSON = await loadModule(join(this.options.appDir || process.cwd(), 'package.json'), {
-      safeLoad: true,
-      enableCache: false,
-    });
-
     const moduleLoadType =
-      pkgJSON?.type === 'module' ? 'esm' : 'commonjs';
+      this.options.pkgJSON?.type === 'module' ? 'esm' : 'commonjs';
 
     const applicationContext = await prepareGlobalApplicationContextAsync({
       baseDir: this.options.baseDir,
@@ -267,6 +261,10 @@ export class GeneratorFactory {
         this.options.appDir,
         tsconfig?.compilerOptions?.outDir || 'dist'
       );
+    }
+
+    if (!this.options.pkgJSON) {
+      this.options.pkgJSON = require(join(this.options.appDir, 'package.json')) || {};
     }
 
     if (!existsSync(this.options.baseDir)) {
