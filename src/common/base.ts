@@ -74,7 +74,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       loadModule,
     } = require('@midwayjs/core');
 
-    const pkgJSON = await loadModule(join(this.options.appDir, 'package.json'), {
+    const pkgJSON = await loadModule(join(this.options.appDir || process.cwd(), 'package.json'), {
       safeLoad: true,
       enableCache: false,
     });
