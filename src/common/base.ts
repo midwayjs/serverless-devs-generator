@@ -67,7 +67,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       MidwayConfigService,
       MidwayFrameworkService,
       MidwayServerlessFunctionService,
-      prepareGlobalApplicationContext,
+      prepareGlobalApplicationContextAsync,
       CONFIGURATION_KEY,
       listModule,
       Types,
@@ -82,7 +82,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
     const moduleLoadType =
       pkgJSON?.type === 'module' ? 'esm' : 'commonjs';
 
-    const applicationContext = await prepareGlobalApplicationContext({
+    const applicationContext = await prepareGlobalApplicationContextAsync({
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
       moduleLoadType,
