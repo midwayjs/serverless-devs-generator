@@ -71,10 +71,21 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       CONFIGURATION_KEY,
       listModule,
       Types,
+      loadModule,
     } = require('@midwayjs/core');
+
+    const pkgJSON = await loadModule(join(this.options.appDir, 'package.json'), {
+      safeLoad: true,
+      enableCache: false,
+    });
+
+    const moduleLoadType =
+      pkgJSON?.type === 'module' ? 'esm' : 'commonjs';
+
     const applicationContext = await prepareGlobalApplicationContext({
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
+      moduleLoadType,
     });
     await applicationContext.getAsync(MidwayFrameworkService, [
       applicationContext,
