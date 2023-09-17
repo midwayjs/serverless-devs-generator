@@ -11,9 +11,11 @@ export abstract class ServerlessDevsGenerator<
     // check yaml file exists
     for (const name of ymlName) {
       const filePath = join(options.appDir, name);
+      const fymlPath = join(options.appDir, 'f.yml');
       if (existsSync(filePath)) {
         const file = readFileSync(filePath, 'utf8');
-        if (this.isPlatformSupport(file)) {
+        const fyml = readFileSync(fymlPath, 'utf8');
+        if (this.isPlatformSupport(file, fyml)) {
           return [filePath, file];
         }
         return false;
@@ -22,7 +24,7 @@ export abstract class ServerlessDevsGenerator<
     return false;
   }
 
-  static isPlatformSupport(file: string) {
+  static isPlatformSupport(file: string, fyml: string) {
     return false;
   }
 }

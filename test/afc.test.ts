@@ -23,8 +23,9 @@ describe('test/afc.test.ts', function() {
     cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'app.entry.js', 'helloService-hello1.entry.js']);
     const generator = new AliFCGenerator({
       appDir,
-      baseDir: join(appDir, 'src')
-    }, join(appDir, 'f.yml'), readFileSync(join(appDir, 'f.yml'), 'utf-8'));
+      baseDir: join(appDir, 'src'),
+      sourceYamlPath: 'f.yml',
+    });
     await generator.generate();
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
@@ -38,8 +39,9 @@ describe('test/afc.test.ts', function() {
     cleanFiles(appDir, ['all_function_name', 'f.total.yml', 'allEvent.entry.js', 'allHttp.entry.js']);
     const generator = new AliFCGenerator({
       appDir,
-      baseDir: join(appDir, 'src')
-    }, join(appDir, 'f.yml'), readFileSync(join(appDir, 'f.yml'), 'utf-8'));
+      baseDir: join(appDir, 'src'),
+      sourceYamlPath: 'f.yml',
+    });
     await generator.generate();
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();
@@ -55,8 +57,9 @@ describe('test/afc.test.ts', function() {
 
     const generator = new AliFCGenerator({
       appDir,
-      baseDir: join(appDir, 'src')
-    }, join(appDir, 'f.yml'), readFileSync(join(appDir, 'f.yml'), 'utf-8'));
+      baseDir: join(appDir, 'src'),
+      sourceYamlPath: 'f.yml',
+    });
     await generator.generate();
 
     expect(existsSync(join(appDir, 'f.total.yml'))).toBeTruthy();

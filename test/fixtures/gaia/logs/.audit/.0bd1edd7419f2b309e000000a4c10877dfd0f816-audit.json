@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 31
+  },
+  "auditLog": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/.audit/.0bd1edd7419f2b309e000000a4c10877dfd0f816-audit.json",
+  "files": [
+    {
+      "date": 1694942467398,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/common-error.log.2023-09-17",
+      "hash": "dd72fdda677132342c8fdf1f2d29bb91"
+    }
+  ],
+  "hashType": "md5"
+}

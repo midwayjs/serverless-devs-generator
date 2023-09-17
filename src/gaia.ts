@@ -1,4 +1,4 @@
-import { Document, stringify } from 'yaml';
+import { stringify } from 'yaml';
 import { BaseGenerator } from './common/base';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
@@ -14,6 +14,9 @@ type FunctionConfig = {
 
 export class GaiaGenerator extends BaseGenerator<FunctionConfig> {
   analyzeFunction(result: FunctionInformation) {
+    // 设置一个目标 yml
+    this.options.targetYamlPath = 'spec.yml';
+
     const allFunc: {
       [functionName: string]: FunctionConfig;
     } = {};
@@ -46,16 +49,10 @@ export class GaiaGenerator extends BaseGenerator<FunctionConfig> {
     return allFunc;
   }
 
-  fillYaml(document: Document.Parsed<any, true>, result: FunctionConfig) {
-    // 先写入一个基础文件
-    writeFileSync(
-      join(this.options.appDir, 'spec.yml'),
-      stringify(document, { indent: 2 })
-    );
-
+  fillYaml(result: FunctionConfig) {
     // 分析出每个函数的触发器
     for (const handler in result) {
-      const cloned = document.clone();
+      const cloned = this.document.clone();
       for (const trigger in result[handler].triggers) {
         cloned.setIn([`trigger-${trigger}`], result[handler].triggers[trigger]);
       }
@@ -66,7 +63,7 @@ export class GaiaGenerator extends BaseGenerator<FunctionConfig> {
       );
     }
 
-    return undefined;
+    return stringify(this.document, { indent: 2 });
   }
 
   static canSupport(options) {

@@ -1,4 +1,12 @@
-import { Document, visit, Scalar, YAMLMap } from 'yaml';
+import {
+  visit,
+  Scalar,
+  YAMLMap,
+  isCollection,
+  stringify,
+  ParsedNode,
+  Document,
+} from 'yaml';
 import { ServerlessDevsGenerator } from '../common/devs';
 import { FunctionInformation } from '../interface';
 import { join } from 'path';
@@ -134,13 +142,91 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
     return Object.values(allFunc);
   }
 
+  fillFunction(node: YAMLMap, functionConfig: FunctionConfig) {
+    // 克隆 functionConfig，避免后续数据被篡改
+    functionConfig = JSON.parse(JSON.stringify(functionConfig));
+    // 过滤触发器下不允许的字段
+    if (functionConfig.triggers) {
+      for (const trigger of functionConfig.triggers) {
+        // 移除 yaml 中不允许的配置
+        for (const key in trigger.config) {
+          if (!this.allowTriggerYamlConfig(trigger.type).includes(key)) {
+            delete trigger.config[key];
+          }
+        }
+      }
+    }
+
+    // 填充函数名
+    node.setIn(['props', 'function', 'name'], functionConfig.function.name);
+    // 填充函数 handler
+    node.setIn(
+      ['props', 'function', 'handler'],
+      functionConfig.function.handler
+    );
+
+    // 填充触发器
+    if (functionConfig.triggers) {
+      for (const trigger of functionConfig.triggers) {
+        // 根据触发器名字，在 triggers 是数组查找同名触发器信息，填充触发器
+        const triggerNode = node.getIn(['props', 'triggers']) as any;
+        if (triggerNode) {
+          const matched = triggerNode.items.findIndex(item => {
+            if (isCollection(item)) {
+              if (item.has('name') && item.get('name') === trigger.name) {
+                return true;
+              }
+              return false;
+            }
+            return false;
+          });
+          if (matched !== -1) {
+            // 找到了
+            const tr = triggerNode.getIn([matched]);
+            tr.setIn(['type'], trigger.type);
+            this.setNodeObjectValue(['config'], trigger.config, tr);
+          } else {
+            // 没找到，新增触发器
+            triggerNode.items.push(trigger);
+          }
+        } else {
+          // 没有触发器字段，新增触发器
+          node.setIn(['props', 'triggers'], [trigger]);
+        }
+      }
+    }
+  }
+
+  fillRoute(node: YAMLMap, functionConfig: FunctionConfig) {
+    if (functionConfig.triggers) {
+      for (const trigger of functionConfig.triggers) {
+        if (trigger.type === 'http') {
+          // 只有 http 触发器才有路由
+          const path = trigger.config.path;
+          if (path) {
+            node.setIn(
+              ['props', 'customDomains'],
+              [
+                {
+                  domainName: path,
+                  protocol: 'HTTP',
+                },
+              ]
+            );
+          }
+        }
+      }
+    }
+  }
+
   fillYaml(
-    document: Document | Document.Parsed<any, true>,
-    result: FunctionConfig[]
+    result: FunctionConfig[],
+    document?: Document | Document.Parsed<ParsedNode, true>
   ) {
     let originComponentNode;
+    const newDocument = (document || this.document).clone();
 
-    visit(document, {
+    visit(newDocument, {
       Value: (key, node: Scalar, path) => {
         if (node.value === 'devsapp/fc') {
           const fcComponentNode = path[path.length - 2] as YAMLMap;
@@ -157,12 +243,8 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
           if (findFunctionConfigIdx !== -1) {
             // 将信息填充到 yaml 节点中
             const functionConfig = result[findFunctionConfigIdx];
-            this.setNodeObjectValue(
-              ['props'],
-              functionConfig,
-              fcComponentNode,
-              ['name']
-            );
+            this.fillFunction(fcComponentNode, functionConfig);
+            // this.fillRoute(fcComponentNode, functionConfig);
             // 删除该节点
             result.splice(findFunctionConfigIdx, 1);
           }
@@ -171,29 +253,51 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
     });
 
     if (!result.length) {
-      return document;
+      return stringify(newDocument, { indent: 2 });
     }
 
     // 填充新的函数信息
     for (const functionConfig of result) {
-      // 克隆现有节点，移除函数名等信息
-      const newFcComponentNode = originComponentNode.clone();
-      newFcComponentNode.deleteIn(['props', 'function']);
-      newFcComponentNode.deleteIn(['props', 'triggers']);
-      newFcComponentNode.deleteIn(['props', 'customDomains']);
+      let newFcComponentNode;
+      if (!originComponentNode) {
+        // 加一个新的节点，一般初始化才会走到这里
+        newFcComponentNode = new YAMLMap();
+        newFcComponentNode.add({
+          key: 'component',
+          value: 'devsapp/fc',
+        });
 
+        const node = document.createNode({
+          region: 'cn-hangzhou',
+          service: '${vars.service}',
+          function: functionConfig.function,
+          triggers: functionConfig.triggers,
+        });
+
+        newFcComponentNode.add({
+          key: 'props',
+          value: node,
+        });
+      } else {
+        // 克隆现有节点，移除函数名等信息
+        newFcComponentNode = originComponentNode.clone();
+        newFcComponentNode.deleteIn(['props', 'function']);
+        newFcComponentNode.deleteIn(['props', 'triggers']);
+        newFcComponentNode.deleteIn(['props', 'customDomains']);
+      }
+
+      this.fillFunction(newFcComponentNode, functionConfig);
       const newProjectName = this.createName(functionConfig);
-      this.setNodeObjectValue(['props'], functionConfig, newFcComponentNode);
-      document.addIn(
+      newDocument.addIn(
         ['services', 'project-' + newProjectName],
         newFcComponentNode
       );
     }
 
-    return document;
+    return stringify(newDocument, { indent: 2 });
   }
 
-  allowTriggerConfig(type: string): string[] {
+  allowTriggerYamlConfig(type: string): string[] {
     switch (type) {
       case 'http':
         return ['authType', 'disableURLInternet', 'methods'];
@@ -224,8 +328,16 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
     }
   }
 
-  static isPlatformSupport(file): boolean {
-    return /devsapp\/fc/.test(file);
+  allowTriggerConfig(type: string): string[] {
+    const result = this.allowTriggerYamlConfig(type);
+    if (type === 'http') {
+      result.push('path');
+    }
+    return result;
+  }
+
+  static isPlatformSupport(file, fyml): boolean {
+    return /aliyun/.test(fyml);
   }
 
   async generateEntry(

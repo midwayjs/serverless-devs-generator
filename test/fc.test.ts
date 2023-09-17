@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { FcGenerator } from '../src/devs/fc';
-import { Document } from 'yaml';
+import { Document, parseDocument } from 'yaml';
 
 describe('test serverless devs yaml generate fc case', () => {
   it('should test yaml parse and stringify', () => {
@@ -13,7 +13,7 @@ describe('test serverless devs yaml generate fc case', () => {
 
   describe('analyzeFunction', function() {
     it('should transform single http trigger', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       const result = generator.analyzeFunction({
         functionList: [{
           'prefix': '/',
@@ -46,7 +46,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should transform multi http trigger with same function', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       const result = generator.analyzeFunction({
         functionList: [{
           'prefix': '/',
@@ -107,7 +107,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should transform multi trigger mixin', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       const result = generator.analyzeFunction({
         functionList: [{
           'url': '/hello',
@@ -161,7 +161,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test http trigger method any', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       const result = generator.analyzeFunction({
         functionList: [{
           'url': '/hello',
@@ -184,7 +184,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test http trigger method all', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       const result = generator.analyzeFunction({
         functionList: [{
           'url': '/hello',
@@ -207,7 +207,7 @@ describe('test serverless devs yaml generate fc case', () => {
     });
 
     it('should test unique trigger name', function() {
-      const generator = new FcGenerator({}, '', '');
+      const generator = new FcGenerator({}, '');
       expect(() => {
         generator.analyzeFunction({
           functionList: [{
@@ -248,22 +248,9 @@ describe('test serverless devs yaml generate fc case', () => {
   });
 
   describe('fillYaml', function() {
-    it('should fill yaml with single function mixin', function() {
-      const generator = new FcGenerator({}, '', '');
-      const document = generator.fillYaml(new Document({
-        services: {
-          project1: {
-            component: 'devsapp/fc',
-            props: {
-              region: 'cn-hangzhou',
-              service: '${vars.service}',
-              function: {
-                name: 'helloService-hello',
-              },
-            }
-          }
-        }
-      }), [
+    it('should fill yaml with no service', function() {
+      const generator = new FcGenerator({}, '');
+      const document = generator.fillYaml([
         {
           "function": {
             "handler": "helloService.hello",
@@ -285,14 +272,36 @@ describe('test serverless devs yaml generate fc case', () => {
             },
           ],
         },
-      ]);
+      ], new Document({}));
 
       expect(document.toString()).toMatchSnapshot();
     });
 
-    it('should fill yaml with new function', function() {
-      const generator = new FcGenerator({}, '', '');
-      const document = generator.fillYaml(new Document({
+    it('should fill yaml with single function mixin', function() {
+      const generator = new FcGenerator({}, '');
+      const document = generator.fillYaml([
+        {
+          "function": {
+            "handler": "helloService.hello",
+            "name": "helloService-hello",
+          },
+          "triggers": [
+            {
+              "config": {
+                "methods": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                ],
+              },
+              "name": "http-38245ab0e0",
+              "type": "http",
+            },
+          ],
+        },
+      ], new Document({
         services: {
           project1: {
             component: 'devsapp/fc',
@@ -305,7 +314,62 @@ describe('test serverless devs yaml generate fc case', () => {
             }
           }
         }
-      }), [
+      }));
+
+      expect(document.toString()).toMatchSnapshot();
+    });
+
+    it('should fill yaml with update with function name', function() {
+      const generator = new FcGenerator({}, '');
+      let document = generator.fillYaml([
+        {
+          "function": {
+            "handler": "helloService.hello",
+            "name": "helloService-hello",
+          },
+          "triggers": [
+            {
+              "config": {
+                "methods": [
+                  "GET",
+                ],
+              },
+              "name": "http-38245ab0e0",
+              "type": "http",
+            },
+          ],
+        },
+      ], new Document({}));
+
+      expect(document).toMatchSnapshot();
+
+      document = generator.fillYaml([
+        {
+          "function": {
+            "handler": "helloService.111",
+            "name": "helloService-hello",
+          },
+          "triggers": [
+            {
+              "config": {
+                "methods": [
+                  "GET",
+                  'POST'
+                ],
+              },
+              "name": "http-38245ab0e0",
+              "type": "http",
+            },
+          ],
+        },
+      ], parseDocument(document))
+
+      expect(document).toMatchSnapshot();
+    });
+
+    it('should fill yaml with new function', function() {
+      const generator = new FcGenerator({}, '');
+      const document = generator.fillYaml([
         {
           "function": {
             "handler": "helloService.hello",
@@ -327,14 +391,49 @@ describe('test serverless devs yaml generate fc case', () => {
             },
           ],
         },
-      ]);
+      ], new Document({
+        services: {
+          project1: {
+            component: 'devsapp/fc',
+            props: {
+              region: 'cn-hangzhou',
+              service: '${vars.service}',
+              function: {
+                name: 'helloService-hello',
+              },
+            }
+          }
+        }
+      }));
 
       expect(document.toString()).toMatchSnapshot();
     });
 
     it('should fill yaml if old trigger exists', function() {
-      const generator = new FcGenerator({}, '', '');
-      const document = generator.fillYaml(new Document({
+      const generator = new FcGenerator({}, '');
+      const document = generator.fillYaml([
+        {
+          "function": {
+            "handler": "helloService.hello",
+            "name": "helloService-hello",
+          },
+          "triggers": [
+            {
+              "config": {
+                "methods": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                ],
+              },
+              "name": "http-38245ab0e0",
+              "type": "http",
+            },
+          ],
+        },
+      ], new Document({
         services: {
           project1: {
             component: 'devsapp/fc',
@@ -358,29 +457,7 @@ describe('test serverless devs yaml generate fc case', () => {
             }
           }
         }
-      }), [
-        {
-          "function": {
-            "handler": "helloService.hello",
-            "name": "helloService-hello",
-          },
-          "triggers": [
-            {
-              "config": {
-                "methods": [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "HEAD",
-                ],
-              },
-              "name": "http-38245ab0e0",
-              "type": "http",
-            },
-          ],
-        },
-      ]);
+      }));
 
       expect(document.toString()).toMatchSnapshot();
     });

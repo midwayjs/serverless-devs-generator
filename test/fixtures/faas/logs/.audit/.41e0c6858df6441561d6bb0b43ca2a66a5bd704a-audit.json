@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 31
+  },
+  "auditLog": "/Users/harry/project/serverless-devs-generator/test/fixtures/faas/logs/.audit/.41e0c6858df6441561d6bb0b43ca2a66a5bd704a-audit.json",
+  "files": [
+    {
+      "date": 1694942466679,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/faas/logs/midway-app.log.2023-09-17",
+      "hash": "43e7faf121ddbc427010affd652f8160"
+    }
+  ],
+  "hashType": "md5"
+}

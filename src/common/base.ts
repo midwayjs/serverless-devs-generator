@@ -1,30 +1,21 @@
-import {
-  Document,
-  isCollection,
-  isScalar,
-  isSeq,
-  ParsedNode,
-  parseDocument,
-  stringify,
-  YAMLMap,
-} from 'yaml';
-import { existsSync, writeFileSync } from 'fs';
+import { Document, isCollection, isSeq, ParsedNode, parseDocument } from 'yaml';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { createHash } from 'crypto';
-import { FunctionInformation, GenerateOptions } from '../interface';
-import { join, resolve } from 'path';
+import {
+  FunctionInformation,
+  GenerateOptions,
+  GeneratorClz,
+} from '../interface';
+import { join, resolve, isAbsolute } from 'path';
 
 export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   protected document: Document.Parsed<ParsedNode, true>;
   constructor(
     protected options: GenerateOptions,
     /**
-     * yaml 文件路径
-     */
-    protected yamlPath: string,
-    /**
      * yaml 内容
      */
-    protected yamlContent: string
+    protected sourceYamlContent?: string
   ) {}
 
   /**
@@ -110,13 +101,46 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   }
 
   public async generate() {
-    this.document = parseDocument(this.yamlContent);
+    if (!this.sourceYamlContent) {
+      if (!this.options.sourceYamlPath) {
+        throw new Error(
+          'sourceYamlPath is required when sourceYamlContent is empty'
+        );
+      }
+
+      if (!isAbsolute(this.options.sourceYamlPath)) {
+        this.options.sourceYamlPath = join(
+          this.options.appDir,
+          this.options.sourceYamlPath
+        );
+      }
+
+      this.sourceYamlContent = readFileSync(
+        this.options.sourceYamlPath,
+        'utf-8'
+      );
+    }
+
+    if (
+      this.options.targetYamlPath &&
+      !isAbsolute(this.options.targetYamlPath)
+    ) {
+      this.options.targetYamlPath = join(
+        this.options.appDir,
+        this.options.targetYamlPath
+      );
+    }
+
+    this.document = parseDocument(this.sourceYamlContent);
     const data = await this.loadFunction();
     const result = this.analyzeFunction(data);
     await this.generateEntry(data, result);
-    const newYaml = await this.fillYaml(this.document, result);
-    if (newYaml) {
-      writeFileSync(this.yamlPath, stringify(newYaml, { indent: 2 }));
+    if (this.options.targetYamlPath) {
+      const updatedYamlString = await this.fillYaml(result);
+      writeFileSync(
+        join(this.options.appDir, this.options.targetYamlPath),
+        updatedYamlString
+      );
     }
   }
 
@@ -172,41 +196,15 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
           }
         }
       } else {
-        // 如果是数组，默认 push 值，否则需要自行处理覆盖问题
-        for (const v of [].concat(value)) {
-          if (
-            node.items.findIndex(item => {
-              if (isScalar(item)) {
-                return item.value === v;
-              }
-              return item === v;
-            }) !== -1
-          ) {
-            // 同样的值，就忽略
-          } else {
-            node.items.push(v);
-          }
-        }
+        // 如果是数组，则直接覆盖
+        node.items = [].concat(value);
       }
     } else if (isCollection(node)) {
+      // 蜀国是数组简单处理，直接覆盖
       if (typeof value === 'object') {
         for (const key in value) {
-          // 拿原值
-          const v = node.getIn([key]) as any;
-          if (!v) {
-            // 如果原值不存在，则直接设置
-            node.setIn([key], value[key]);
-          } else {
-            if (isCollection(v)) {
-              // 如果原值是对象，则递归设置
-              this.setNodeObjectValue(
-                [key],
-                value[key],
-                node,
-                objectArrayMatchKeyWordList
-              );
-            }
-          }
+          // 对象内容直接设置
+          node.setIn([key], value[key]);
         }
       }
     }
@@ -218,14 +216,9 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
     result: FunctionInformation
   ): AnalyzeFunctionResult | AnalyzeFunctionResult[];
   abstract fillYaml(
-    document: Document.Parsed<any, true>,
-    result: AnalyzeFunctionResult | AnalyzeFunctionResult[]
-  ):
-    | Document
-    | Document.Parsed<any, true>
-    | YAMLMap
-    | undefined
-    | Promise<Document | Document.Parsed<any> | YAMLMap | undefined>;
+    result: AnalyzeFunctionResult | AnalyzeFunctionResult[],
+    document?: Document | Document.Parsed<ParsedNode, true>
+  ): undefined | string | Promise<string | undefined>;
   abstract generateEntry(
     information: FunctionInformation,
     config: AnalyzeFunctionResult | AnalyzeFunctionResult[]
@@ -239,13 +232,6 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
     return false;
   }
 }
-
-type GeneratorClz = {
-  canSupport(options: GenerateOptions): boolean | string[];
-  new (options: GenerateOptions, yamlPath: string, yamlContent: string): {
-    generate(): void;
-  };
-};
 
 export class GeneratorFactory {
   constructor(protected options: GenerateOptions) {
@@ -264,7 +250,8 @@ export class GeneratorFactory {
     }
 
     if (!this.options.pkgJSON) {
-      this.options.pkgJSON = require(join(this.options.appDir, 'package.json')) || {};
+      this.options.pkgJSON =
+        require(join(this.options.appDir, 'package.json')) || {};
     }
 
     if (!existsSync(this.options.baseDir)) {
@@ -282,7 +269,13 @@ export class GeneratorFactory {
     for (const GeneratorClz of this.generators) {
       const canSupport = GeneratorClz.canSupport(this.options);
       if (canSupport) {
-        return new GeneratorClz(this.options, canSupport[0], canSupport[1]);
+        return new GeneratorClz(
+          {
+            ...this.options,
+            sourceYamlPath: canSupport[0],
+          },
+          canSupport[1]
+        );
       }
     }
   }

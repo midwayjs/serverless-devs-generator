@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 31
+  },
+  "auditLog": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/.audit/.3ef2772e115079f8f876d29695b847524802c431-audit.json",
+  "files": [
+    {
+      "date": 1694942467054,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/common-error.log.2023-09-17",
+      "hash": "e9aab2e5c9a3c4c557f6c7b694c072e1"
+    }
+  ],
+  "hashType": "md5"
+}

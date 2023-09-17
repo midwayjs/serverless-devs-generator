@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 31
+  },
+  "auditLog": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/.audit/.2fe3570489a393874d3bb1582ed6c418152cfe60-audit.json",
+  "files": [
+    {
+      "date": 1694942467400,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/midway-app.log.2023-09-17",
+      "hash": "1006ba0968297ead03a89e22cbb954ef"
+    }
+  ],
+  "hashType": "md5"
+}

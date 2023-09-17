@@ -1,4 +1,4 @@
-import { Document, stringify, YAMLMap } from 'yaml';
+import { stringify, YAMLMap } from 'yaml';
 import { BaseGenerator } from './common/base';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
@@ -53,6 +53,9 @@ export function commonPrefix(arr: string[]): string {
 
 export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
   analyzeFunction(result: FunctionInformation) {
+    // 设置一个目标 yml
+    this.options.targetYamlPath = 'f.total.yml';
+
     const allFunc: {
       [functionName: string]: FunctionConfig;
     } = {};
@@ -290,34 +293,7 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
     return result;
   }
 
-  async fillYaml(
-    document: Document.Parsed<any, true>,
-    result: FunctionConfig[]
-  ) {
-    const cloned = document.clone();
-    const serviceName = cloned.hasIn(['service', 'name']);
-    if (!serviceName && cloned.has('service')) {
-      const name = cloned.get('service');
-      cloned.delete('service');
-      cloned.setIn(['service', 'name'], name);
-    }
-
-    // 填充新的函数信息
-    for (const functionConfig of result) {
-      if (!cloned.hasIn(['functions', functionConfig.functionName])) {
-        cloned.addIn(['functions', functionConfig.functionName], {
-          handler: functionConfig.handler,
-          events: functionConfig.events,
-        });
-      }
-    }
-
-    writeFileSync(
-      join(this.options.appDir, 'f.total.yml'),
-      stringify(cloned),
-      'utf8'
-    );
-
+  async fillYaml(result: FunctionConfig[]) {
     // 写一个所有函数名+handler的文件，方便脚本处理
     const allFunctionNames = result.map(
       func => `${func.functionName}_${func.handler}`
@@ -328,7 +304,28 @@ export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
       'utf8'
     );
 
-    return undefined;
+    const cloned = this.document.clone();
+
+    const serviceName = cloned.hasIn(['service', 'name']);
+    if (!serviceName && cloned.has('service')) {
+      const name = cloned.get('service');
+      cloned.delete('service');
+      cloned.setIn(['service', 'name'], name);
+    }
+
+    // 填充新的函数信息
+    for (const functionConfig of result) {
+      if (!cloned.hasIn(['functions', functionConfig.functionName])) {
+        const node = cloned.createNode({
+          handler: functionConfig.handler,
+          events: functionConfig.events,
+        });
+
+        cloned.setIn(['functions', functionConfig.functionName], node);
+      }
+    }
+
+    return stringify(cloned);
   }
 
   getAggregationFunName(aggregationName: string) {

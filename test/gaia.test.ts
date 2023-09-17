@@ -16,8 +16,9 @@ describe('test/gaia.test.ts', function() {
     }
     const generator = new GaiaGenerator({
       appDir,
-      baseDir: join(appDir, 'src')
-    }, join(appDir, 'f.yml'), readFileSync(join(appDir, 'f.yml'), 'utf-8'));
+      baseDir: join(appDir, 'src'),
+      sourceYamlPath: join(appDir, 'f.yml'),
+    });
     await generator.generate();
 
     expect(existsSync(join(appDir, 'index.js'))).toBeTruthy();
