@@ -12,11 +12,19 @@ export interface GenerateOptions {
    * 填充写入的目标 yaml 文件路径
    */
   targetYamlPath?: string;
+  /**
+   * 原始 yaml 文件内容
+   */
+  sourceYamlContent?: string;
 }
 
 export interface GeneratorClz {
   canSupport(options: GenerateOptions): boolean | string[];
-  new (options: GenerateOptions, sourceYamlContent: string): {
+  new (
+    options: GenerateOptions,
+    sourceYamlPath?: string,
+    sourceYamlContent?: string
+  ): {
     generate(): void;
   };
 }

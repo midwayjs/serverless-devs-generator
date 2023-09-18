@@ -13,7 +13,13 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   constructor(
     protected options: GenerateOptions,
     /**
+     * yaml 文件路径
+     * @deprecated
+     */
+    protected sourceYamlPath?: string,
+    /**
      * yaml 内容
+     * @deprecated
      */
     protected sourceYamlContent?: string
   ) {}
@@ -101,7 +107,15 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
   }
 
   public async generate() {
-    if (!this.sourceYamlContent) {
+    if (this.sourceYamlPath) {
+      this.options.sourceYamlPath = this.sourceYamlPath;
+    }
+
+    if (this.sourceYamlContent) {
+      this.options.sourceYamlContent = this.sourceYamlContent;
+    }
+
+    if (!this.options.sourceYamlContent) {
       if (!this.options.sourceYamlPath) {
         throw new Error(
           'sourceYamlPath is required when sourceYamlContent is empty'
@@ -115,7 +129,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
         );
       }
 
-      this.sourceYamlContent = readFileSync(
+      this.options.sourceYamlContent = readFileSync(
         this.options.sourceYamlPath,
         'utf-8'
       );
@@ -131,7 +145,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       );
     }
 
-    this.document = parseDocument(this.sourceYamlContent);
+    this.document = parseDocument(this.options.sourceYamlContent);
     const data = await this.loadFunction();
     const result = this.analyzeFunction(data);
     await this.generateEntry(data, result);
@@ -266,13 +280,11 @@ export class GeneratorFactory {
     for (const GeneratorClz of this.generators) {
       const canSupport = GeneratorClz.canSupport(this.options);
       if (canSupport) {
-        return new GeneratorClz(
-          {
-            ...this.options,
-            sourceYamlPath: canSupport[0],
-          },
-          canSupport[1]
-        );
+        return new GeneratorClz({
+          ...this.options,
+          sourceYamlPath: canSupport[0],
+          sourceYamlContent: canSupport[1],
+        });
       }
     }
   }
