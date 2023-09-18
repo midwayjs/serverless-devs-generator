@@ -267,7 +267,7 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
           value: 'devsapp/fc',
         });
 
-        const node = document.createNode({
+        const node = newDocument.createNode({
           region: 'cn-hangzhou',
           service: '${vars.service}',
           function: functionConfig.function,

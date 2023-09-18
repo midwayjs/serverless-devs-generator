@@ -9,6 +9,11 @@
       "date": 1694942467055,
       "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/midway-app.log.2023-09-17",
       "hash": "2be482863ec39dfa0091497cb32b7b00"
+    },
+    {
+      "date": 1695004378384,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/midway-app.log.2023-09-18",
+      "hash": "de241eb7670a63d57666d4cc13cf17e1"
     }
   ],
   "hashType": "md5"

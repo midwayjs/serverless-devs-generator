@@ -15,7 +15,7 @@ type FunctionConfig = {
 export class GaiaGenerator extends BaseGenerator<FunctionConfig> {
   analyzeFunction(result: FunctionInformation) {
     // 设置一个目标 yml
-    this.options.targetYamlPath = 'spec.yml';
+    this.options.targetYamlPath = join(this.options.appDir, 'spec.yml');
 
     const allFunc: {
       [functionName: string]: FunctionConfig;

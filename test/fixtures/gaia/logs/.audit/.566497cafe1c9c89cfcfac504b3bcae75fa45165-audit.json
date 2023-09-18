@@ -9,6 +9,11 @@
       "date": 1694942467397,
       "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/midway-core.log.2023-09-17",
       "hash": "173632f97177d81acd31ccdbc632c352"
+    },
+    {
+      "date": 1695004378357,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/midway-core.log.2023-09-18",
+      "hash": "937c7514c641f9f8f63cc95bb4f14901"
     }
   ],
   "hashType": "md5"

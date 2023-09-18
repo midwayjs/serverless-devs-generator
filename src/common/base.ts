@@ -137,10 +137,7 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
     await this.generateEntry(data, result);
     if (this.options.targetYamlPath) {
       const updatedYamlString = await this.fillYaml(result);
-      writeFileSync(
-        join(this.options.appDir, this.options.targetYamlPath),
-        updatedYamlString
-      );
+      writeFileSync(this.options.targetYamlPath, updatedYamlString);
     }
   }
 

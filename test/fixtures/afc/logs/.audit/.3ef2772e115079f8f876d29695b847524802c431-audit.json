@@ -9,6 +9,11 @@
       "date": 1694942467054,
       "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/common-error.log.2023-09-17",
       "hash": "e9aab2e5c9a3c4c557f6c7b694c072e1"
+    },
+    {
+      "date": 1695004378368,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/afc/logs/common-error.log.2023-09-18",
+      "hash": "5c2cfa98abf72bd7d7b46959d9c0b10a"
     }
   ],
   "hashType": "md5"

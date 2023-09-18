@@ -54,7 +54,7 @@ export function commonPrefix(arr: string[]): string {
 export class AliFCGenerator extends BaseGenerator<FunctionConfig> {
   analyzeFunction(result: FunctionInformation) {
     // 设置一个目标 yml
-    this.options.targetYamlPath = 'f.total.yml';
+    this.options.targetYamlPath = join(this.options.appDir, 'f.total.yml');
 
     const allFunc: {
       [functionName: string]: FunctionConfig;

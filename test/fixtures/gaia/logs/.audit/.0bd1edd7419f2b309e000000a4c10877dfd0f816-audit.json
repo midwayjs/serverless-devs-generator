@@ -9,6 +9,11 @@
       "date": 1694942467398,
       "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/common-error.log.2023-09-17",
       "hash": "dd72fdda677132342c8fdf1f2d29bb91"
+    },
+    {
+      "date": 1695004378368,
+      "name": "/Users/harry/project/serverless-devs-generator/test/fixtures/gaia/logs/common-error.log.2023-09-18",
+      "hash": "90514297bea80f10b7bbf19ecbffbf8b"
     }
   ],
   "hashType": "md5"

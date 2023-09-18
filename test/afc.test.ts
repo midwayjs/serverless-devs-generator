@@ -24,7 +24,7 @@ describe('test/afc.test.ts', function() {
     const generator = new AliFCGenerator({
       appDir,
       baseDir: join(appDir, 'src'),
-      sourceYamlPath: 'f.yml',
+      sourceYamlPath: join(appDir, 'f.yml'),
     });
     await generator.generate();
 
@@ -40,7 +40,7 @@ describe('test/afc.test.ts', function() {
     const generator = new AliFCGenerator({
       appDir,
       baseDir: join(appDir, 'src'),
-      sourceYamlPath: 'f.yml',
+      sourceYamlPath: join(appDir, 'f.yml'),
     });
     await generator.generate();
 
@@ -58,7 +58,7 @@ describe('test/afc.test.ts', function() {
     const generator = new AliFCGenerator({
       appDir,
       baseDir: join(appDir, 'src'),
-      sourceYamlPath: 'f.yml',
+      sourceYamlPath: join(appDir, 'f.yml'),
     });
     await generator.generate();
 
