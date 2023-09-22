@@ -228,6 +228,8 @@ exports[`test serverless devs yaml generate fc case fillYaml should fill yaml wi
       function:
         handler: helloService.hello
         name: helloService-hello
+        codeUri: .
+        initializer: helloService.initializer
       triggers:
         - config:
             methods:
