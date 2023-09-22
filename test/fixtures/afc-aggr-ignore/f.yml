@@ -1,0 +1,22 @@
+provider:
+  name: aliyun
+  runtime: alinode7
+  starter: '@ali/midway-fc-starter'
+
+aggregation:
+  api:
+    functionsPattern:
+      - api*
+  renderNot2:
+    functionsPattern:
+      - render*
+      - '!render2'
+  normal:
+    functions:
+      - normal1
+      - normal2
+    functionsPattern: # skip pattern, use functions
+      - '!normal*'
+custom:
+  customDomain:
+    domainName: abc.def.com

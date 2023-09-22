@@ -1,0 +1,3 @@
+provider:
+  platform: aliyun # 平台
+  component: 'devsapp/fc' # 组件名称

@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test base generator should test fc yaml with trigger set 1`] = `
+"function:
+  name: helloService-hello
+  handler: index.handler
+  triggers:
+    - name: httpTrigger
+      type: http
+      config:
+        methods:
+          - GET
+          - POST
+          - PUT
+"
+`;
+
+exports[`test base generator should test setNodeObjectValue 1`] = `
+{
+  "d": {
+    "b": {
+      "c": {
+        "test": 1,
+        "test2": {
+          "data": [
+            "c",
+          ],
+        },
+      },
+    },
+  },
+  "e": [
+    {
+      "test": 1,
+      "test2": {
+        "data": [
+          "c",
+        ],
+      },
+    },
+  ],
+  "f": [
+    {
+      "data": 4,
+      "name": "fc",
+      "value": 2,
+    },
+  ],
+}
+`;
+
+exports[`test base generator should test setNodeObjectValue will be keep default value 1`] = `
+"d:
+  data: 2
+  test2:
+    data:
+      - c
+"
+`;
+
+exports[`test base generator should test setNodeObjectValue will merge string array 1`] = `
+"d:
+  - c
+"
+`;
