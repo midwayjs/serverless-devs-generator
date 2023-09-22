@@ -77,6 +77,14 @@ export abstract class BaseGenerator<AnalyzeFunctionResult = unknown> {
       baseDir: this.options.baseDir,
       appDir: this.options.appDir,
       moduleLoadType,
+      globalConfig: {
+        midwayLogger: {
+          default: {
+            enableFile: false,
+            enableError: false,
+          },
+        },
+      },
     });
     await applicationContext.getAsync(MidwayFrameworkService, [
       applicationContext,
