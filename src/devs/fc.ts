@@ -109,7 +109,10 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
 
         if (triggerType === 'http') {
           // 对 http 方法 any 的支持
-          const { method } = func.functionTriggerMetadata;
+          let { method } = func.functionTriggerMetadata;
+          if (typeof method === 'string' && /,/.test(method)) {
+            method = method.split(',');
+          }
           let methodList = [].concat(method || []);
           if (methodList.includes('any') || methodList.includes('all')) {
             func.functionTriggerMetadata.method = 'any';
@@ -197,28 +200,6 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
     }
   }
 
-  fillRoute(node: YAMLMap, functionConfig: FunctionConfig) {
-    if (functionConfig.triggers) {
-      for (const trigger of functionConfig.triggers) {
-        if (trigger.type === 'http') {
-          // 只有 http 触发器才有路由
-          const path = trigger.config.path;
-          if (path) {
-            node.setIn(
-              ['props', 'customDomains'],
-              [
-                {
-                  domainName: path,
-                  protocol: 'HTTP',
-                },
-              ]
-            );
-          }
-        }
-      }
-    }
-  }
-
   fillYaml(
     result: FunctionConfig[],
     document?: Document | Document.Parsed<ParsedNode, true>
@@ -270,7 +251,13 @@ export class FcGenerator extends ServerlessDevsGenerator<FunctionConfig> {
         const node = newDocument.createNode({
           region: 'cn-hangzhou',
           service: '${vars.service}',
-          function: functionConfig.function,
+          function: {
+            ...functionConfig.function,
+            codeUri: '.',
+            initializer: `${
+              functionConfig.function.handler.split('.')[0]
+            }.initializer`,
+          },
           triggers: functionConfig.triggers,
         });
 
